@@ -173,7 +173,8 @@ jobs:
           else
             (
               cd crates/agent-gui
-              pnpm tauri build --config src-tauri/tauri.macos.release.conf.json --config src-tauri/tauri.macos.preview.conf.json --config "$LIVEAGENT_TAURI_VERSION_CONFIG" --target "${{ matrix.target }}" --bundles app
+              env -u APPLE_SIGNING_IDENTITY -u TAURI_SIGNING_PRIVATE_KEY -u TAURI_SIGNING_PRIVATE_KEY_PASSWORD \
+                pnpm tauri build --config src-tauri/tauri.macos.release.conf.json --config src-tauri/tauri.macos.preview.conf.json --config "$LIVEAGENT_TAURI_VERSION_CONFIG" --target "${{ matrix.target }}" --bundles app
             )
             mkdir -p "target/${{ matrix.target }}/release/bundle/dmg"
             dmgbuild \
