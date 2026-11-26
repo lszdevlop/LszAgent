@@ -13,7 +13,7 @@
 | **GitHub 仓库（`origin`）** | https://github.com/lszdevlop/LszAgent （Public 公开仓库，同时作为在线自动更新源，默认分支：`main`） |
 | **上游开源仓库（`upstream`）** | https://github.com/Stack-Cairn/LiveAgent.git |
 | **正式 Release 下载页** | https://github.com/lszdevlop/LszAgent/releases/tag/v2.0.39 |
-| **成功发版 Actions 记录** | https://github.com/lszdevlop/LszAgent/actions/runs/45778899130 |
+| **成功发版 Actions 记录** | https://github.com/lszdevlop/LszAgent/actions/runs/45785700220 |
 | **本地源码仓库路径** | [LiveAgent](file:///root/.gemini/antigravity/scratch/LiveAgent) |
 | **本地已拉取正式安装包目录** | [dist-release](file:///root/.gemini/antigravity/scratch/LiveAgent/dist-release) |
 | **方案一（解包重打包版）留档目录** | [liveagent-custom-installer](file:///root/.gemini/antigravity/scratch/liveagent-custom-installer) |
@@ -35,7 +35,7 @@
 
 | 平台 | 产物文件 | 体积 | 校验与使用备注 |
 | --- | --- | --- | --- |
-| **Windows x64** | [LszAgent-v2.0.39-Windows-x64-Setup.exe](file:///root/.gemini/antigravity/scratch/LiveAgent/dist-release/LszAgent-v2.0.39-Windows-x64-Setup.exe) | 82.7 MB | 主力安装包，SHA-256: `1c2c6d1aba7e292ae7479781f2a2d73de2f6d08e115fae06773c31535d5b85f2` |
+| **Windows x64** | [LszAgent-v2.0.39-Windows-x64-Setup.exe](file:///root/.gemini/antigravity/scratch/LiveAgent/dist-release/LszAgent-v2.0.39-Windows-x64-Setup.exe) | 82.7 MB | 主力安装包（内置在线自动更新），SHA-256: `427167f7c041f41b762190458678df3bd6d76068dfbcf9d3b9379ab83d9f5c13` |
 | **Windows x64** | [LszAgent-v2.0.39-Windows-x64.msi](file:///root/.gemini/antigravity/scratch/LiveAgent/dist-release/LszAgent-v2.0.39-Windows-x64.msi) | 97.9 MB | 企业部署 MSI 安装包 |
 | **Windows x64** | [LszAgent-v2.0.39-Windows-x64-portable.zip](file:///root/.gemini/antigravity/scratch/LiveAgent/dist-release/LszAgent-v2.0.39-Windows-x64-portable.zip) | 97.6 MB | 免安装便携压缩包 |
 | **macOS (Apple Silicon)** | `LszAgent-v2.0.39-macOS-aarch64.dmg` | 150.0 MB | 未配置苹果开发者证书，首次打开若遇拦截请执行：`xattr -cr /Applications/LszAgent.app` |
