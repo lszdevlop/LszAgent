@@ -173,8 +173,13 @@ jobs:
           else
             (
               cd crates/agent-gui
-              env -u APPLE_SIGNING_IDENTITY -u TAURI_SIGNING_PRIVATE_KEY -u TAURI_SIGNING_PRIVATE_KEY_PASSWORD \
-                pnpm tauri build --config src-tauri/tauri.macos.release.conf.json --config src-tauri/tauri.macos.preview.conf.json --config "$LIVEAGENT_TAURI_VERSION_CONFIG" --target "${{ matrix.target }}" --bundles app
+              if [ "${LIVEAGENT_IS_PRERELEASE:-false}" != "true" ] && [ -n "${TAURI_SIGNING_PRIVATE_KEY:-}" ]; then
+                env -u APPLE_SIGNING_IDENTITY \
+                  pnpm tauri build --config src-tauri/tauri.macos.release.conf.json --config "$LIVEAGENT_TAURI_VERSION_CONFIG" --target "${{ matrix.target }}" --bundles app
+              else
+                env -u APPLE_SIGNING_IDENTITY -u TAURI_SIGNING_PRIVATE_KEY -u TAURI_SIGNING_PRIVATE_KEY_PASSWORD \
+                  pnpm tauri build --config src-tauri/tauri.macos.release.conf.json --config src-tauri/tauri.macos.preview.conf.json --config "$LIVEAGENT_TAURI_VERSION_CONFIG" --target "${{ matrix.target }}" --bundles app
+              fi
             )
             mkdir -p "target/${{ matrix.target }}/release/bundle/dmg"
             dmgbuild \
@@ -209,12 +214,17 @@ jobs:
           set -euo pipefail
           mkdir -p dist
           dmg_path="$(find "target/${{ matrix.target }}/release/bundle/dmg" -maxdepth 1 -name 'LszAgent_*.dmg' -print -quit 2>/dev/null || true)"
+          updater_path="$(find "target/${{ matrix.target }}/release/bundle/macos" -maxdepth 1 -name '*.app.tar.gz' -print -quit 2>/dev/null || true)"
           if [ -n "$dmg_path" ]; then
             cp "$dmg_path" "dist/LszAgent-${LIVEAGENT_RELEASE_TAG}-macOS-${{ matrix.suffix }}.dmg"
           else
             app_path="target/${{ matrix.target }}/release/bundle/macos/LszAgent.app"
             test -d "$app_path"
             ditto -c -k --sequesterRsrc --keepParent "$app_path" "dist/LszAgent-${LIVEAGENT_RELEASE_TAG}-macOS-${{ matrix.suffix }}.app.zip"
+          fi
+          if [ -n "$updater_path" ] && [ -f "$updater_path.sig" ]; then
+            cp "$updater_path" "dist/LszAgent-${LIVEAGENT_RELEASE_TAG}-macOS-${{ matrix.suffix }}.app.tar.gz"
+            cp "$updater_path.sig" "dist/LszAgent-${LIVEAGENT_RELEASE_TAG}-macOS-${{ matrix.suffix }}.app.tar.gz.sig"
           fi
 
       - uses: actions/upload-artifact@v7
@@ -310,8 +320,12 @@ jobs:
           test -n "$exe_path"
           test -n "$portable_exe_path"
           test -s "$gateway_exe_path"
+          test -f "$msi_path.sig"
+          test -f "$exe_path.sig"
           cp "$msi_path" "dist/LszAgent-${LIVEAGENT_RELEASE_TAG}-Windows-x64.msi"
+          cp "$msi_path.sig" "dist/LszAgent-${LIVEAGENT_RELEASE_TAG}-Windows-x64.msi.sig"
           cp "$exe_path" "dist/LszAgent-${LIVEAGENT_RELEASE_TAG}-Windows-x64-Setup.exe"
+          cp "$exe_path.sig" "dist/LszAgent-${LIVEAGENT_RELEASE_TAG}-Windows-x64-Setup.exe.sig"
           mkdir -p dist/portable/LszAgent
           cp "$portable_exe_path" dist/portable/LszAgent/LszAgent.exe
           binary_dir="crates/agent-gui/src-tauri/binaries"
@@ -431,14 +445,20 @@ jobs:
       - name: Verify glibc baseline
         run: bash scripts/release/verify-linux-glibc-baseline.sh
 
-      - name: Strip bundled Wayland libraries from AppImage
+      - name: Strip bundled Wayland libraries and re-sign AppImage
         if: env.LIVEAGENT_IS_PRERELEASE != 'true'
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
           set -euo pipefail
           appimage_path="$(find crates/agent-gui/src-tauri/target target -type f -name '*.AppImage' -path '*bundle*' -print -quit 2>/dev/null || true)"
           test -n "$appimage_path"
           appimage_path="$(realpath "$appimage_path")"
           scripts/release/postprocess-linux-appimage.sh "$appimage_path"
+          test ! -e "$appimage_path.sig"
+          pnpm --dir crates/agent-gui tauri signer sign "$appimage_path"
+          test -s "$appimage_path.sig"
 
       - name: Verify Linux AppImage contains backend and computer helper
         run: |
@@ -463,9 +483,15 @@ jobs:
           test -n "$appimage_path"
           test -n "$deb_path"
           test -n "$rpm_path"
+          test -f "$appimage_path.sig"
+          test -f "$deb_path.sig"
+          test -f "$rpm_path.sig"
           cp "$appimage_path" "dist/LszAgent-${LIVEAGENT_RELEASE_TAG}-Linux-x86_64.AppImage"
+          cp "$appimage_path.sig" "dist/LszAgent-${LIVEAGENT_RELEASE_TAG}-Linux-x86_64.AppImage.sig"
           cp "$deb_path" "dist/LszAgent-${LIVEAGENT_RELEASE_TAG}-Linux-x86_64.deb"
+          cp "$deb_path.sig" "dist/LszAgent-${LIVEAGENT_RELEASE_TAG}-Linux-x86_64.deb.sig"
           cp "$rpm_path" "dist/LszAgent-${LIVEAGENT_RELEASE_TAG}-Linux-x86_64.rpm"
+          cp "$rpm_path.sig" "dist/LszAgent-${LIVEAGENT_RELEASE_TAG}-Linux-x86_64.rpm.sig"
 
       - uses: actions/upload-artifact@v7
         with:
@@ -558,3 +584,6 @@ jobs:
             exit 1
           fi
           gh release upload "$RELEASE_TAG" "${public_assets[@]}" --clobber
+
+          node scripts/release/create-tauri-updater-manifest.mjs release-artifacts release-artifacts/latest.json "$notes_path"
+          gh release upload "$RELEASE_TAG" release-artifacts/latest.json --clobber

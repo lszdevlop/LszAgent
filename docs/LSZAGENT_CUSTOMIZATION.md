@@ -10,7 +10,7 @@
    - 全局配置中心（共享 UI、桌面端、WebUI 均可引用）：
      - `LSZ_APP_NAME = "LszAgent"`：软件品牌名。
      - `LSZ_DISABLE_API_KEY_REVEAL = true`：全局禁用设置页“小眼睛查看明文 API Key”及复制明文密钥。
-     - `LSZ_DISABLE_AUTO_UPDATE = true`：全局关闭自动更新检测、更新公告弹窗及关于页更新入口。
+     - `LSZ_DISABLE_AUTO_UPDATE = false`：保留官方在线自动更新、版本公告弹窗及“关于”页检查更新能力（如需彻底禁用仅需改为 `true`）。
      - `LSZ_BUILTIN_PROVIDER`：内置第三方接口配置（默认 `http://142.91.102.27:8317/v1` + 对应 `API Key`，支持通过构建环境变量 `VITE_LSZ_BASE_URL` / `VITE_LSZ_API_KEY` / `VITE_LSZ_PROVIDER_NAME` 覆盖）。
      - `LSZ_MODEL_SYNC_INTERVAL_MS = 5 * 60 * 1000`：后台定期拉取上游 `/models` 的间隔（默认 5 分钟，同时支持启动后、窗口切回前台、网络恢复时自动增量同步）。
      - `LSZ_AUTO_SYNC_USER_PROVIDERS = false`：是否对用户自行添加的供应商也执行后台轮询（默认仅轮询内置动态接口，不影响用户自己添加的自定义供应商）。
@@ -32,8 +32,8 @@
 | 软件名称 `LszAgent` | `crates/agent-ui/src/i18n/hostTranslations.ts`<br>`crates/agent-gui/src/i18n/{config,startupTranslations}.ts`<br>`crates/agent-gui/index.html`、`trayMenu.ts`<br>`crates/agent-gui/src-tauri/tauri*.conf.json`、`Info.plist`、`Makefile`<br>`crates/agent-gui/src-tauri/src/{lib.rs,services/tray.rs}` | 读取 `LSZ_APP_NAME` / `custom::APP_NAME` 并将打包 `productName` 设为 `LszAgent`（完全未改动千行大词表 `enUSCommon` / `zhCNCommon`） |
 | 禁用小眼睛查看明文 Key | `crates/agent-ui/src/pages/settings/{ProviderCredentialRow,ProviderModal,ProviderModalView,SttSection}.tsx`<br>`crates/agent-gui/src/agent-ui-adapters/providerSettings.tsx` | 依据 `LSZ_DISABLE_API_KEY_REVEAL` 隐藏眼睛按钮、锁定 `type="password"` 并拦截 `revealStoredProviderApiKey` |
 | 内置接口 & 定期拉取模型 | `crates/agent-gui/src/lib/settings/storage.ts`<br>`crates/agent-gui/src/App.tsx`<br>`crates/agent-gui/src-tauri/src/services/kbrain_backend.rs` | 各挂载 1～2 行调用 `lszProviderSync` 与 `custom::ensure_initial_kbrain_config` |
-| 关闭自动更新 | `crates/agent-gui/src/App.tsx`、`AboutSection.tsx`、`settingsSearch.ts`<br>`crates/agent-gui/src-tauri/src/commands/app/update.rs`、`services/tray.rs`<br>`crates/agent-gui/src-tauri/tauri.*.release.conf.json` | 依据 `LSZ_DISABLE_AUTO_UPDATE` / `DISABLE_AUTO_UPDATE` 彻底关闭网络检查与入口，并关闭 `.sig` 更新清单产物 |
-| CI 自动构建安装包 | `.github/workflows/desktop-release.yml` | 产物名统一为 `LszAgent-*`，且无 Apple 证书或 Tauri 签名私钥时仍可正常打出全平台安装包 |
+| 在线自动更新 | `crates/agent-gui/src-tauri/src/{custom.rs,commands/app/update.rs}`<br>`crates/agent-gui/src-tauri/tauri.conf.json`、`tauri.*.release.conf.json`<br>`crates/agent-gui/src/{App.tsx,pages/settings/AboutSection.tsx}` | 复用官方在线更新检测与安装规则，更新源指向公开仓库 `lszdevlop/LszAgent`，内置独立 Minisign 公钥验签并自动发布 `latest.json` |
+| CI 自动构建安装包 | `.github/workflows/desktop-release.yml` | 产物名统一为 `LszAgent-*`，自动签名更新包并上传 `latest.json` 在线更新清单 |
 
 ---
 

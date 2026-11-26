@@ -45,7 +45,7 @@ const { ProviderCredentialRow } = env.loadModule(
 test("LszAgent brand and security switches are configured", () => {
   assert.equal(custom.LSZ_APP_NAME, "LszAgent");
   assert.equal(custom.LSZ_DISABLE_API_KEY_REVEAL, true);
-  assert.equal(custom.LSZ_DISABLE_AUTO_UPDATE, true);
+  assert.equal(custom.LSZ_DISABLE_AUTO_UPDATE, false);
   assert.equal(custom.LSZ_BUILTIN_PROVIDER.baseUrl, "http://142.91.102.27:8317/v1");
 });
 

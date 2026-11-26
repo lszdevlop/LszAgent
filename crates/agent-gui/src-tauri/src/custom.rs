@@ -3,7 +3,8 @@ use std::fs;
 use std::path::Path;
 
 pub const APP_NAME: &str = "LszAgent";
-pub const DISABLE_AUTO_UPDATE: bool = true;
+pub const DISABLE_AUTO_UPDATE: bool = false;
+pub const UPDATE_REPOSITORY: &str = "lszdevlop/LszAgent";
 
 const BUILTIN_PROVIDER_ID: &str = "lsz-builtin";
 const BUILTIN_PROVIDER_NAME: &str = "默认接口";

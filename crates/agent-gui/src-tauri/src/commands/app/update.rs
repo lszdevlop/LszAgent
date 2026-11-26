@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager, Url};
 use tauri_plugin_updater::UpdaterExt;
 
+#[cfg(test)]
 const DEFAULT_UPDATE_REPOSITORY: &str = "Stack-Cairn/LiveAgent";
 const UPDATE_MANIFEST_ASSET: &str = "latest.json";
 
@@ -95,7 +96,7 @@ fn update_repository() -> String {
         .or_else(|| option_env!("LIVEAGENT_UPDATE_REPOSITORY").map(str::to_string))
         .map(|value| value.trim().trim_matches('/').to_string())
         .filter(|value| !value.is_empty())
-        .unwrap_or_else(|| DEFAULT_UPDATE_REPOSITORY.to_string())
+        .unwrap_or_else(|| crate::custom::UPDATE_REPOSITORY.to_string())
 }
 
 fn updater_public_key_override() -> Option<String> {

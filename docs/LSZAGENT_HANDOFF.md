@@ -1,7 +1,7 @@
 # LszAgent 项目完整交接文档（Handoff Guide）
 
 > [!IMPORTANT]
-> 本文档为 `LszAgent` 二次开发、日常换源、上游同步与自动化发版的独立交接手册（与仓库内偏代码挂载说明的 [LSZAGENT_CUSTOMIZATION.md](file:///root/.gemini/antigravity/scratch/LiveAgent/docs/LSZAGENT_CUSTOMIZATION.md) 配套互补）。包含内置 API Key 等敏感信息，请仅保存在私有仓库或内部受控环境中。
+> 本文档为 `LszAgent` 二次开发、日常换源、上游同步与自动化发版的独立交接手册（与仓库内偏代码挂载说明的 [LSZAGENT_CUSTOMIZATION.md](file:///root/.gemini/antigravity/scratch/LiveAgent/docs/LSZAGENT_CUSTOMIZATION.md) 配套互补）。当前仓库已转为 **Public 公开仓库**以支持官方在线自动更新程序直接读取 GitHub Releases 与 `latest.json`。
 
 ---
 
@@ -10,7 +10,7 @@
 | 资产项 | 详情 |
 | --- | --- |
 | **软件品牌名称** | `LszAgent`（基于 LiveAgent `v2.0.39` 深度解耦定制） |
-| **GitHub 私有仓库（`origin`）** | https://github.com/lszdevlop/LszAgent （默认分支：`main`） |
+| **GitHub 仓库（`origin`）** | https://github.com/lszdevlop/LszAgent （Public 公开仓库，同时作为在线自动更新源，默认分支：`main`） |
 | **上游开源仓库（`upstream`）** | https://github.com/Stack-Cairn/LiveAgent.git |
 | **正式 Release 下载页** | https://github.com/lszdevlop/LszAgent/releases/tag/v2.0.39 |
 | **成功发版 Actions 记录** | https://github.com/lszdevlop/LszAgent/actions/runs/45778899130 |
@@ -22,9 +22,10 @@
 - **供应商 ID / 显示名**：`lsz-builtin` / `默认接口`
 - **协议类型**：`type: "codex"` + `api: "openai-responses"`（原生支持推理、多模态视觉与联网工具；同时兼容 `/v1/chat/completions`）
 - **Base URL**：`http://142.91.102.27:8317/v1`
-- **API Key**：`sk-MkSxLRCJmliAoW7QarmxL2FtcHos7C4KmV0fe4CkzdWmfVoD`
+- **API Key**：见 `lszCustomization.ts` / `custom.rs`（或构建期 Secrets）
 - **默认模型策略**：**不指定静态默认模型**（首次安装进入对话页显示“选择模型”，由用户自行从实时列表中挑选；选定后自动记忆）
 - **模型列表自动同步**：启动即同步 + 后台每 `5` 分钟轮询 `/v1/models` + 窗口切回前台 / 网络恢复时触发（带 `60` 秒最小防抖间隔）
+- **在线自动更新**：已启用官方在线更新程序，默认检测仓库为 `lszdevlop/LszAgent`（支持稳定版 / 预发布通道、`latest.json` 自动签名校验一键升级与版本更新公告）
 
 ---
 
@@ -125,9 +126,12 @@ node --test crates/agent-gui/test/custom/lsz-customization.test.mjs \
 git push origin main
 ```
 
-### 4.3 触发编译并发布新版本安装包
+### 4.3 触发编译并发布新版本安装包（含在线自动更新）
+仓库 Actions Secrets 中已配置专属 Tauri 更新器签名密钥（`TAURI_SIGNING_PRIVATE_KEY`、`TAURI_SIGNING_PRIVATE_KEY_PASSWORD`、`TAURI_UPDATER_PUBLIC_KEY`），且对应公钥已写入 [tauri.conf.json](file:///root/.gemini/antigravity/scratch/LiveAgent/crates/agent-gui/src-tauri/tauri.conf.json)。
+
 ```bash
-# 版本号需符合语义化版本（vX.Y.Z），Desktop Release 会自动用该版本号覆盖应用内版本并创建 GitHub Release
+# 版本号需符合语义化版本（vX.Y.Z），Desktop Release 会自动签名更新产物并上传 latest.json
+# 已安装旧版 LszAgent 的客户端会自动从 lszdevlop/LszAgent/releases.atom 检测到新版本并提示一键更新
 git tag -a v2.0.40 -m "LszAgent v2.0.40"
 git push origin v2.0.40
 ```

@@ -10,8 +10,8 @@ export const LSZ_APP_NAME = "LszAgent";
 /** Disables the "eye" button and secret-reveal endpoints for API keys in Settings. */
 export const LSZ_DISABLE_API_KEY_REVEAL = true;
 
-/** Disables automatic/manual update checks and release announcements against upstream GitHub. */
-export const LSZ_DISABLE_AUTO_UPDATE = true;
+/** Disables automatic/manual update checks and release announcements when set to true. */
+export const LSZ_DISABLE_AUTO_UPDATE = false;
 
 /** Periodic interval (5 minutes) for refreshing upstream `/models` in the background. */
 export const LSZ_MODEL_SYNC_INTERVAL_MS = 5 * 60 * 1000;
