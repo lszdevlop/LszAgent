@@ -104,14 +104,16 @@ jobs:
         run: pnpm --dir crates/agent-gui prepare:kbrain:release
 
       - name: Import Apple signing certificate
-        if: env.LIVEAGENT_IS_PRERELEASE != 'true' && secrets.APPLE_CERTIFICATE_P12_BASE64 != ''
+        if: env.LIVEAGENT_IS_PRERELEASE != 'true'
         env:
           APPLE_CERTIFICATE_P12_BASE64: ${{ secrets.APPLE_CERTIFICATE_P12_BASE64 }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
         run: |
           set -euo pipefail
-          test -n "$APPLE_CERTIFICATE_P12_BASE64"
-          test -n "$APPLE_CERTIFICATE_PASSWORD"
+          if [ -z "${APPLE_CERTIFICATE_P12_BASE64:-}" ] || [ -z "${APPLE_CERTIFICATE_PASSWORD:-}" ]; then
+            echo "No Apple signing certificate configured; skipping codesign setup."
+            exit 0
+          fi
           KEYCHAIN_PATH="$RUNNER_TEMP/liveagent-release.keychain-db"
           KEYCHAIN_PASSWORD="$(openssl rand -hex 24)"
           CERT_PATH="$RUNNER_TEMP/developer-id-application.p12"
@@ -126,16 +128,17 @@ jobs:
           security find-identity -v -p codesigning "$KEYCHAIN_PATH"
 
       - name: Store notarization profile
-        if: env.LIVEAGENT_IS_PRERELEASE != 'true' && secrets.APPLE_ID != ''
+        if: env.LIVEAGENT_IS_PRERELEASE != 'true'
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
         run: |
           set -euo pipefail
-          test -n "$APPLE_ID"
-          test -n "$APPLE_TEAM_ID"
-          test -n "$APPLE_APP_SPECIFIC_PASSWORD"
+          if [ -z "${APPLE_ID:-}" ] || [ -z "${APPLE_TEAM_ID:-}" ] || [ -z "${APPLE_APP_SPECIFIC_PASSWORD:-}" ]; then
+            echo "No Apple notarization credentials configured; skipping notarization setup."
+            exit 0
+          fi
           xcrun notarytool store-credentials liveagent-notary \
             --apple-id "$APPLE_ID" \
             --team-id "$APPLE_TEAM_ID" \
@@ -154,8 +157,7 @@ jobs:
       - name: Verify staged K-brain binaries and Tauri packaging contract
         run: node scripts/release/verify-kbrain-packaging.mjs --target "${{ matrix.target }}" --binary-dir crates/agent-gui/src-tauri/binaries
 
-      - name: Build signed and notarized DMG
-        if: env.LIVEAGENT_IS_PRERELEASE != 'true' && secrets.APPLE_SIGNING_IDENTITY != ''
+      - name: Build macOS app and DMG
         env:
           APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
           DESKTOP_MACOS_TARGET: ${{ matrix.target }}
@@ -163,12 +165,23 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
           LIVEAGENT_UPDATER_PUBLIC_KEY: ${{ secrets.TAURI_UPDATER_PUBLIC_KEY }}
           LIVEAGENT_UPDATE_REPOSITORY: ${{ github.repository }}
-        run: make desktop-build-macos-release
-
-      - name: Build unsigned macOS app and DMG
-        if: env.LIVEAGENT_IS_PRERELEASE == 'true' || secrets.APPLE_SIGNING_IDENTITY == ''
-        working-directory: crates/agent-gui
-        run: pnpm tauri build --config src-tauri/tauri.macos.release.conf.json --config src-tauri/tauri.macos.preview.conf.json --config "$LIVEAGENT_TAURI_VERSION_CONFIG" --target "${{ matrix.target }}" --bundles app dmg
+        run: |
+          set -euo pipefail
+          if [ "${LIVEAGENT_IS_PRERELEASE:-false}" != "true" ] && [ -n "${APPLE_SIGNING_IDENTITY:-}" ]; then
+            make desktop-build-macos-release
+          else
+            (
+              cd crates/agent-gui
+              pnpm tauri build --config src-tauri/tauri.macos.release.conf.json --config src-tauri/tauri.macos.preview.conf.json --config "$LIVEAGENT_TAURI_VERSION_CONFIG" --target "${{ matrix.target }}" --bundles app
+            )
+            mkdir -p "target/${{ matrix.target }}/release/bundle/dmg"
+            dmgbuild \
+              -s "scripts/release/macos-dmg-settings.py" \
+              -D app="target/${{ matrix.target }}/release/bundle/macos/LszAgent.app" \
+              -D background="crates/agent-gui/src-tauri/dmg/background.png" \
+              -D volume_icon="crates/agent-gui/src-tauri/icons/icon.icns" \
+              "LszAgent" "target/${{ matrix.target }}/release/bundle/dmg/LszAgent_${LIVEAGENT_APP_VERSION}_${{ matrix.suffix }}.dmg"
+          fi
 
       - name: Verify macOS executables match the target architecture
         run: |
@@ -498,19 +511,19 @@ jobs:
           if ! gh api "repos/$GH_REPO/releases/generate-notes" \
             -f tag_name="$RELEASE_TAG" \
             --jq ".body" > "$github_notes_path"; then
-            printf 'LiveAgent %s\n' "$RELEASE_TAG" > "$github_notes_path"
+            printf 'LszAgent %s\n' "$RELEASE_TAG" > "$github_notes_path"
           fi
           if [ ! -s "$github_notes_path" ]; then
-            printf 'LiveAgent %s\n' "$RELEASE_TAG" > "$github_notes_path"
+            printf 'LszAgent %s\n' "$RELEASE_TAG" > "$github_notes_path"
           fi
 
           node scripts/release/create-ai-release-notes.mjs "$RELEASE_TAG" "$notes_path" "$github_notes_path"
           if [ ! -s "$notes_path" ]; then
-            printf 'LiveAgent %s\n' "$RELEASE_TAG" > "$notes_path"
+            printf 'LszAgent %s\n' "$RELEASE_TAG" > "$notes_path"
           fi
 
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-            edit_args=(--title "LiveAgent $RELEASE_TAG" --notes-file "$notes_path")
+            edit_args=(--title "LszAgent $RELEASE_TAG" --notes-file "$notes_path")
             if [ "$is_prerelease" = true ]; then
               edit_args+=(--prerelease)
             else
@@ -518,7 +531,7 @@ jobs:
             fi
             gh release edit "$RELEASE_TAG" "${edit_args[@]}"
           else
-            create_args=(--verify-tag --title "LiveAgent $RELEASE_TAG" --notes-file "$notes_path")
+            create_args=(--verify-tag --title "LszAgent $RELEASE_TAG" --notes-file "$notes_path")
             if [ "$is_prerelease" = true ]; then
               create_args+=(--prerelease)
             fi
