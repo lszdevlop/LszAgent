@@ -89,6 +89,7 @@ jobs:
           # Cargo workspace root is the repo root, so artifacts live in ./target.
           workspaces: ". -> target"
           key: ${{ matrix.target }}
+          cache-on-failure: true
 
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile --filter liveagent... --filter @liveagent/gateway-webui...
@@ -267,6 +268,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: ". -> target"
+          cache-on-failure: true
 
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile --filter liveagent... --filter @liveagent/gateway-webui...
@@ -398,6 +400,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: ". -> target"
+          cache-on-failure: true
 
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile --filter liveagent... --filter @liveagent/gateway-webui...

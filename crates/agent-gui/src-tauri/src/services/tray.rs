@@ -210,20 +210,25 @@ pub fn build_tray_menu_skeleton(
     )?;
     let quit = MenuItem::with_id(app, TRAY_QUIT_ID, "退出", true, None::<&str>)?;
 
+    let sep_status = PredefinedMenuItem::separator(app)?;
+    let sep_window = PredefinedMenuItem::separator(app)?;
+    let sep_context = PredefinedMenuItem::separator(app)?;
+    let sep_runtime = PredefinedMenuItem::separator(app)?;
+    let sep_quit = PredefinedMenuItem::separator(app)?;
     let mut menu_items: Vec<&dyn tauri::menu::IsMenuItem<tauri::Wry>> = vec![
         &status,
-        &PredefinedMenuItem::separator(app)?,
+        &sep_status,
         &show,
         &new_chat,
         &pin,
-        &PredefinedMenuItem::separator(app)?,
+        &sep_window,
         &recent,
         &workspaces,
-        &PredefinedMenuItem::separator(app)?,
+        &sep_context,
         &runs,
         &cron,
         &gateway,
-        &PredefinedMenuItem::separator(app)?,
+        &sep_runtime,
         &appearance,
         &settings,
     ];
@@ -232,7 +237,7 @@ pub fn build_tray_menu_skeleton(
     }
     menu_items.extend([
         &open_data_dir as &dyn tauri::menu::IsMenuItem<tauri::Wry>,
-        &PredefinedMenuItem::separator(app)?,
+        &sep_quit,
         &quit,
     ]);
     let menu = Menu::with_items(app, &menu_items)?;
@@ -687,11 +692,11 @@ mod tests {
 
     #[test]
     fn compose_status_line_appends_suffix_only_when_non_empty() {
-        assert_eq!(compose_status_line("1.3.0", None), "LiveAgent 1.3.0");
-        assert_eq!(compose_status_line("1.3.0", Some("  ")), "LiveAgent 1.3.0");
+        assert_eq!(compose_status_line("1.3.0", None), "LszAgent 1.3.0");
+        assert_eq!(compose_status_line("1.3.0", Some("  ")), "LszAgent 1.3.0");
         assert_eq!(
             compose_status_line("1.3.0", Some("远程已连接")),
-            "LiveAgent 1.3.0 · 远程已连接"
+            "LszAgent 1.3.0 · 远程已连接"
         );
     }
 }
