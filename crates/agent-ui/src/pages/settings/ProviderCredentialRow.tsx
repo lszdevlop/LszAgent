@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@liveagent/ui/components/ui/select";
+import { LSZ_DISABLE_API_KEY_REVEAL } from "@liveagent/ui/lib/custom/lszCustomization";
 import { cn } from "@liveagent/ui/lib/shared/utils";
 import { GEMINI_API_PLATFORM_LABEL_KEYS, GEMINI_API_PLATFORM_PRESETS } from "./geminiApiPlatform";
 import type { ProviderModalViewModel } from "./ProviderModal";
@@ -53,27 +54,29 @@ export function ProviderCredentialRow({ viewModel }: { viewModel: ProviderModalV
           <Input
             variant="plain"
             id="modal-apikey"
-            type={showApiKey ? "text" : "password"}
+            type={!LSZ_DISABLE_API_KEY_REVEAL && showApiKey ? "text" : "password"}
             value={apiKey}
-            className="h-10 pr-9 shadow-none"
+            className={cn("h-10 shadow-none", !LSZ_DISABLE_API_KEY_REVEAL && "pr-9")}
             onChange={(event) => setApiKey(event.currentTarget.value)}
             onFocus={(event) => {
               // The stored-key placeholder is selected whole, so typing replaces it.
               if (apiKeyIsRedactedDisplay) event.currentTarget.select();
             }}
           />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground hover:bg-transparent hover:text-foreground"
-            onClick={() => void toggleShowApiKey()}
-            disabled={revealingApiKey}
-            title={showApiKey ? t("settings.hideApiKey") : t("settings.showApiKey")}
-            aria-label={showApiKey ? t("settings.hideApiKey") : t("settings.showApiKey")}
-          >
-            {showApiKey ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-          </Button>
+          {!LSZ_DISABLE_API_KEY_REVEAL ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground hover:bg-transparent hover:text-foreground"
+              onClick={() => void toggleShowApiKey()}
+              disabled={revealingApiKey}
+              title={showApiKey ? t("settings.hideApiKey") : t("settings.showApiKey")}
+              aria-label={showApiKey ? t("settings.hideApiKey") : t("settings.showApiKey")}
+            >
+              {showApiKey ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            </Button>
+          ) : null}
         </div>
         {revealApiKeyError ? <p className="text-xs text-destructive">{revealApiKeyError}</p> : null}
       </div>

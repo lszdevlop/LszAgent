@@ -168,8 +168,8 @@ impl KBrainBackendManager {
         if cancelled() {
             return Err("K-brain backend startup cancelled".into());
         }
-        std::fs::create_dir_all(&backend_dir)
-            .map_err(|_| "Unable to create K-brain data root".to_string())?;
+        // Creates the backend data root and seeds LszAgent initial config on fresh installs.
+        crate::custom::prepare_kbrain_backend_dir(&backend_dir)?;
         let storage_id = backend_storage_id(&backend_dir)?;
         let token = uuid::Uuid::new_v4().to_string();
 

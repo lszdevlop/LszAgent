@@ -78,7 +78,7 @@ async function open(saved) {
 
 const toggle = () => env.act(async () => vm.toggleShowApiKey());
 
-test("hiding an unedited revealed key goes back to the fixed-length placeholder", async () => {
+test("API key reveal via eye button is disabled while keeping stored key intact", async () => {
   const saved = [];
   const close = await open(saved);
   try {
@@ -86,21 +86,10 @@ test("hiding an unedited revealed key goes back to the fixed-length placeholder"
     assert.equal(vm.apiKeyIsRedactedDisplay, true);
 
     await toggle();
-    assert.equal(vm.showApiKey, true);
-    assert.equal(vm.apiKey, STORED_KEY);
-    assert.deepEqual(reveals, ["relay-1"]);
+    assert.equal(vm.showApiKey, false, "reveal toggle stays disabled");
+    assert.equal(vm.apiKey, PLACEHOLDER, "stored plaintext key is never revealed");
+    assert.deepEqual(reveals, [], "backend secret reveal endpoint is never called");
 
-    await toggle();
-    assert.equal(vm.showApiKey, false);
-    assert.equal(vm.apiKey, PLACEHOLDER, "same mask length as on first open");
-    assert.equal(vm.apiKeyIsRedactedDisplay, true, "focus still selects the whole placeholder");
-
-    await toggle();
-    assert.equal(vm.showApiKey, true);
-    assert.equal(vm.apiKey, STORED_KEY, "the cached plaintext is shown again");
-    assert.equal(reveals.length, 1, "no second round trip to the backend");
-
-    await toggle();
     await env.act(async () => vm.handleSave());
     assert.equal(saved.at(-1).apiKey, "", "an unedited key is never sent back");
     assert.equal(saved.at(-1).apiKeyConfigured, true);
@@ -109,26 +98,11 @@ test("hiding an unedited revealed key goes back to the fixed-length placeholder"
   }
 });
 
-test("saving while the revealed key is shown still keeps the stored reference", async () => {
+test("replacing an existing key with a newly typed key still saves the new masked value", async () => {
   const saved = [];
   const close = await open(saved);
   try {
-    await toggle();
-    await env.act(async () => vm.handleSave());
-    assert.equal(saved.at(-1).apiKey, "");
-    assert.equal(saved.at(-1).apiKeyConfigured, true);
-  } finally {
-    await close();
-  }
-});
-
-test("an edited key keeps its own value (and length) when hidden", async () => {
-  const saved = [];
-  const close = await open(saved);
-  try {
-    await toggle();
     await env.act(async () => vm.setApiKey("test-key-456"));
-    await toggle();
     assert.equal(vm.showApiKey, false);
     assert.equal(vm.apiKey, "test-key-456");
     assert.equal(vm.apiKeyIsRedactedDisplay, false);

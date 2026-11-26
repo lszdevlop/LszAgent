@@ -1,3 +1,4 @@
+import { LSZ_APP_NAME } from "../lib/custom/lszCustomization";
 import { SHARED_TRANSLATIONS } from "./sharedTranslations";
 
 export type Locale = "zh-CN" | "en-US";
@@ -69,6 +70,7 @@ export function registerTranslations(namespace: TranslationTable) {
  * registered so far. For code that formats shared messages outside a host's `t`.
  */
 export function sharedMessage(key: string, locale: Locale): string | undefined {
+  if (key === "app.name") return LSZ_APP_NAME;
   const core: Record<string, string> = SHARED_TRANSLATIONS[locale];
   if (Object.hasOwn(core, key)) return core[key];
   for (const namespace of registeredNamespaces) {
@@ -81,10 +83,12 @@ export function createHostTranslations(overrides: TranslationTable) {
   const translations: TranslationTable = {
     "zh-CN": {
       ...SHARED_TRANSLATIONS["zh-CN"],
+      "app.name": LSZ_APP_NAME,
       ...overrides["zh-CN"],
     },
     "en-US": {
       ...SHARED_TRANSLATIONS["en-US"],
+      "app.name": LSZ_APP_NAME,
       ...overrides["en-US"],
     },
   };

@@ -2,6 +2,8 @@
  * Startup and migration screen copy. The screen paints before the app's i18n provider loads,
  * so it reads this table directly; `{name}` placeholders are filled by `startupText`.
  */
+import { LSZ_APP_NAME } from "@liveagent/ui/lib/custom/lszCustomization";
+
 const zh = {
   "operation.waiting": "等待检查",
   "operation.reading": "正在读取旧数据",
@@ -30,7 +32,7 @@ const zh = {
     "当前步骤耗时较长。可以跳过直接进入应用，未完成的迁移会在后台继续；也可以重启本地服务后重试。",
   "waiting.plain": "当前步骤耗时较长，仍在等待处理结果。",
   restartRetry: "重启本地服务并重试",
-  ariaLabel: "LiveAgent 启动进度",
+  ariaLabel: `${LSZ_APP_NAME} 启动进度`,
   retry: "重试",
   skip: "跳过，进入应用",
 };
@@ -49,7 +51,7 @@ const en: Record<StartupTextKey, string> = {
   "title.checking": "Checking old data",
   "title.migrating": "Migrating old conversations",
   "title.opening": "Opening your workspace",
-  "title.error": "Could not start LiveAgent",
+  "title.error": `Could not start ${LSZ_APP_NAME}`,
   "detail.migrating":
     "The first upgrade needs to prepare your history. Large histories can take a while.",
   "detail.opening": "Your workspace will open shortly…",
@@ -63,13 +65,12 @@ const en: Record<StartupTextKey, string> = {
   "source.legacy": "Legacy history",
   "source.pi": "Other history",
   elapsed: "Elapsed {seconds}s",
-  "waiting.escapes":
-    "This step is taking a while. Skip to open LiveAgent now while the migration continues in the background, or restart the local service and retry.",
+  "waiting.escapes": `This step is taking a while. Skip to open ${LSZ_APP_NAME} now while the migration continues in the background, or restart the local service and retry.`,
   "waiting.plain": "This step is taking a while. Still waiting for its result.",
   restartRetry: "Restart local service and retry",
-  ariaLabel: "LiveAgent startup progress",
+  ariaLabel: `${LSZ_APP_NAME} startup progress`,
   retry: "Retry",
-  skip: "Skip and open LiveAgent",
+  skip: `Skip and open ${LSZ_APP_NAME}`,
 };
 
 export function startupText(

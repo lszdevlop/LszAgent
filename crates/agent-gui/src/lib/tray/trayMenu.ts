@@ -12,6 +12,7 @@
 
 import { invoke } from "@liveagent/app/shims/tauriCore";
 import type { CronTask } from "@liveagent/ui/lib/automation/types";
+import { LSZ_APP_NAME } from "@liveagent/ui/lib/custom/lszCustomization";
 import type { SidebarConversation } from "@liveagent/ui/lib/sidebar/types";
 import { type Locale, t } from "../../i18n/config";
 import type { AppSettings, Theme, WorkspaceProject } from "../settings";
@@ -163,7 +164,7 @@ export function buildTrayMenuModel(input: BuildTrayMenuModelInput): TrayMenuMode
         : t("tray.gatewayDisconnected", locale);
 
   const tooltipParts = [
-    "LiveAgent",
+    LSZ_APP_NAME,
     runningCount > 0 ? withCount(t("tray.tooltipRunning", locale), runningCount) : null,
     gatewayStatusText,
   ].filter((part): part is string => Boolean(part));

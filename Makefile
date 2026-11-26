@@ -17,7 +17,7 @@ endif
 DESKTOP_WINDOWS_TARGET ?= x86_64-pc-windows-msvc
 DESKTOP_LINUX_TARGET ?= x86_64-unknown-linux-gnu
 DESKTOP_LINUX_BUNDLES ?= appimage deb rpm
-DESKTOP_MACOS_APP_NAME ?= LiveAgent
+DESKTOP_MACOS_APP_NAME ?= LszAgent
 DESKTOP_MACOS_NOTARY_PROFILE ?= liveagent-notary
 DESKTOP_MACOS_TAURI_CONFIG ?= src-tauri/tauri.macos.conf.json
 DESKTOP_MACOS_DMG_SETTINGS ?= scripts/release/macos-dmg-settings.py

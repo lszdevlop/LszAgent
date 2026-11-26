@@ -1559,7 +1559,7 @@ export function ProviderModalView({ viewModel }: { viewModel: ProviderModalViewM
                                     : "••••••••"}
                                 </code>
                                 {/* WebUI 永不下发明文 apiKey,查看按钮只在桌面端提供。 */}
-                                {!isGatewayWebui ? (
+                                {!isGatewayWebui && usageVariableApiKey !== "••••••••" ? (
                                   <button
                                     type="button"
                                     className="shrink-0 text-muted-foreground transition-colors hover:text-foreground"

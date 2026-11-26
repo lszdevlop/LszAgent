@@ -19,6 +19,7 @@ import {
 } from "@liveagent/app/lib/settings";
 import { useConfirmDialog } from "@liveagent/ui/components/ui/confirm-dialog";
 import { useLocale } from "@liveagent/ui/i18n/index";
+import { LSZ_DISABLE_API_KEY_REVEAL } from "@liveagent/ui/lib/custom/lszCustomization";
 import { loadThinkingLiveSupplement } from "@liveagent/ui/lib/models/thinkingLive";
 import {
   applyCliIdentity,
@@ -324,6 +325,7 @@ function useProviderModalController({
   const translateRef = useRef(t);
   translateRef.current = t;
   const toggleShowApiKey = useCallback(async () => {
+    if (LSZ_DISABLE_API_KEY_REVEAL) return;
     if (showApiKey) {
       setShowApiKey(false);
       // An unedited stored key goes back behind the fixed-length placeholder, so the
@@ -377,7 +379,12 @@ function useProviderModalController({
   // 变量实际生效值:查询专用覆盖优先,留空回退供应商自身配置(与 Rust
   // prepare_script_query 的解析顺序一致)。
   const usageVariableBaseUrl = usageQuery.baseUrl.trim() || baseUrl.trim();
-  const usageVariableApiKey = usageQuery.apiKey.trim() || apiKey.trim();
+  const rawUsageVariableApiKey = usageQuery.apiKey.trim() || apiKey.trim();
+  const usageVariableApiKey = LSZ_DISABLE_API_KEY_REVEAL
+    ? rawUsageVariableApiKey
+      ? REDACTED_SECRET_DISPLAY
+      : ""
+    : rawUsageVariableApiKey;
   // Token Plan 供应商:显式选择优先,否则按 Base URL 自动检测。
   const activeCodingPlanProvider =
     usageQuery.codingPlanProvider || detectCodingPlanProvider(baseUrl);

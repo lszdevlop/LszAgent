@@ -598,6 +598,10 @@ fn release_announcement_response(
 pub async fn app_release_announcement(
     app: AppHandle,
 ) -> Result<Option<AppReleaseAnnouncementResponse>, String> {
+    if crate::custom::DISABLE_AUTO_UPDATE {
+        let _ = &app;
+        return Ok(None);
+    }
     let repository = update_repository();
     let current_version = current_version(&app);
     let Some(release) = fetch_current_release(&repository, &current_version).await? else {
@@ -644,6 +648,17 @@ pub async fn app_update_check(
     include_prerelease: bool,
 ) -> Result<AppUpdateCheckResponse, String> {
     let repository = update_repository();
+    if crate::custom::DISABLE_AUTO_UPDATE {
+        return Ok(no_update_response(
+            &app,
+            repository,
+            if include_prerelease {
+                AppUpdateChannel::Prerelease
+            } else {
+                AppUpdateChannel::Stable
+            },
+        ));
+    }
 
     let Some(release) = select_release_manifest(&repository, include_prerelease).await? else {
         return Ok(no_update_response(
@@ -688,6 +703,17 @@ pub async fn app_update_install(
     include_prerelease: bool,
 ) -> Result<AppUpdateCheckResponse, String> {
     let repository = update_repository();
+    if crate::custom::DISABLE_AUTO_UPDATE {
+        return Ok(no_update_response(
+            &app,
+            repository,
+            if include_prerelease {
+                AppUpdateChannel::Prerelease
+            } else {
+                AppUpdateChannel::Stable
+            },
+        ));
+    }
 
     let Some(release) = select_release_manifest(&repository, include_prerelease).await? else {
         return Ok(no_update_response(

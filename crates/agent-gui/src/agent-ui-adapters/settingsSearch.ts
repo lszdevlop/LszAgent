@@ -1,3 +1,4 @@
+import { LSZ_DISABLE_AUTO_UPDATE } from "@liveagent/ui/lib/custom/lszCustomization";
 import type { SettingsSearchExtension } from "@liveagent/ui/lib/settings/settingsSearchIndex";
 
 /** Settings rows only the desktop app renders, for settings search and the palette. */
@@ -88,20 +89,24 @@ export const desktopSettingsSearch: SettingsSearchExtension = {
       descriptionKey: "settings.dataDirDesc",
       keywords: ["data", "folder", "directory", "storage"],
     },
-    {
-      section: "about",
-      anchor: "about-update",
-      labelKey: "settings.aboutSoftwareUpdate",
-      descriptionKey: "settings.aboutSoftwareUpdateDesc",
-      keywords: ["update", "version", "upgrade"],
-    },
-    {
-      section: "about",
-      anchor: "about-prerelease",
-      labelKey: "settings.aboutPrereleaseTitle",
-      descriptionKey: "settings.aboutPrereleaseDesc",
-      keywords: ["beta", "prerelease", "update channel"],
-    },
+    ...(LSZ_DISABLE_AUTO_UPDATE
+      ? []
+      : [
+          {
+            section: "about" as const,
+            anchor: "about-update",
+            labelKey: "settings.aboutSoftwareUpdate",
+            descriptionKey: "settings.aboutSoftwareUpdateDesc",
+            keywords: ["update", "version", "upgrade"],
+          },
+          {
+            section: "about" as const,
+            anchor: "about-prerelease",
+            labelKey: "settings.aboutPrereleaseTitle",
+            descriptionKey: "settings.aboutPrereleaseDesc",
+            keywords: ["beta", "prerelease", "update channel"],
+          },
+        ]),
     {
       section: "about",
       anchor: "about-debug",

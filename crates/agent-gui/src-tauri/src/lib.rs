@@ -1,4 +1,5 @@
 mod commands;
+pub(crate) mod custom;
 mod runtime;
 mod services;
 
@@ -827,7 +828,7 @@ fn configure_system_tray(app: &tauri::App) -> tauri::Result<()> {
     let menu = skeleton.menu.clone();
 
     let mut tray_builder = TrayIconBuilder::new()
-        .tooltip("LiveAgent")
+        .tooltip(custom::APP_NAME)
         .menu(&menu)
         .show_menu_on_left_click(TRAY_SHOW_MENU_ON_LEFT_CLICK)
         .on_menu_event(|app, event| {

@@ -8,6 +8,10 @@ import {
   type GatewaySettingsSyncAck,
 } from "@liveagent/ui/lib/settings/sync";
 import { type Locale, normalizeLocale } from "../../i18n/config";
+import {
+  ensureLszBuiltinProviderSeeded,
+  resolveLszEffectiveSelectedModel,
+} from "../custom/lszProviderSync";
 import { isKBrainBackendEnabled, isKBrainBrowserHost } from "../host";
 import { createKBrainClient } from "../kbrain/client";
 import {
@@ -570,7 +574,8 @@ async function loadAndMaybeImportKBrainProviders(
     legacyProviders,
     legacySelectedModel,
   );
-  const settings = await backfillKBrainCatalogMetadata(loaded.document, loaded.providers);
+  const seeded = await ensureLszBuiltinProviderSeeded(loaded);
+  const settings = await backfillKBrainCatalogMetadata(seeded.document, seeded.providers);
   refreshRejectedLegacyProviders();
   return settings;
 }
@@ -694,13 +699,14 @@ export async function loadPersistedSettingsWithDefaults(): Promise<PersistedSett
     throw new SettingsStorageError("load_failed", error);
   }
   const customProviders = kbrainSettings.providers;
-  const selectedModel =
+  const selectedModel = resolveLszEffectiveSelectedModel(
     kbrainSettings.document.defaultProvider && kbrainSettings.document.defaultModel
       ? {
           customProviderId: kbrainSettings.document.defaultProvider,
           model: kbrainSettings.document.defaultModel,
         }
-      : undefined;
+      : undefined,
+  );
   if (isKBrainBrowserHost()) {
     const local = readBrowserPersistedSettings();
     let promptSettings: { agents: AppSettings["agents"]; projects: Record<string, unknown> };

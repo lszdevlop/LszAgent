@@ -35,6 +35,7 @@ import { StatusDot } from "@liveagent/ui/components/ui/status-dot";
 import { Switch } from "@liveagent/ui/components/ui/switch";
 import { toast } from "@liveagent/ui/components/ui/toast-manager";
 import { useLocale } from "@liveagent/ui/i18n/index";
+import { LSZ_DISABLE_API_KEY_REVEAL } from "@liveagent/ui/lib/custom/lszCustomization";
 import { cn } from "@liveagent/ui/lib/shared/utils";
 import { errorMessageWithFallback } from "@liveagent/ui/lib/shared/value";
 import { SttSettingsRequestError } from "@liveagent/ui/lib/stt/errors";
@@ -641,15 +642,24 @@ export function SttSection({
                                 <Input
                                   variant="plain"
                                   id={inputId}
-                                  type={secret && !visible ? "password" : "text"}
+                                  type={
+                                    secret && (LSZ_DISABLE_API_KEY_REVEAL || !visible)
+                                      ? "password"
+                                      : "text"
+                                  }
                                   autoComplete="off"
                                   spellCheck={false}
                                   readOnly={
+                                    !LSZ_DISABLE_API_KEY_REVEAL &&
                                     Boolean(secretField) &&
                                     visible &&
                                     service.secretRevealMode === "field-name"
                                   }
-                                  className={secret ? "w-full min-w-0 pr-10" : "w-full min-w-0"}
+                                  className={
+                                    secret && !LSZ_DISABLE_API_KEY_REVEAL
+                                      ? "w-full min-w-0 pr-10"
+                                      : "w-full min-w-0"
+                                  }
                                   inputMode={
                                     (definition.id === "tencent_cloud" && field === "appId") ||
                                     (definition.id === "baidu_cloud" &&
@@ -682,7 +692,7 @@ export function SttSection({
                                     } as Partial<SttProviderSettings>);
                                   }}
                                 />
-                                {secretField ? (
+                                {!LSZ_DISABLE_API_KEY_REVEAL && secretField ? (
                                   <button
                                     type="button"
                                     className={cn(

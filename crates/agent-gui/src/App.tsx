@@ -8,6 +8,7 @@ import { Pin } from "@liveagent/ui/components/IconSet";
 import { useConfirmDialog } from "@liveagent/ui/components/ui/confirm-dialog";
 import { Toaster } from "@liveagent/ui/components/ui/toaster";
 import { LocaleContext, t as translate, useLocaleContextValue } from "@liveagent/ui/i18n/index";
+import { LSZ_DISABLE_AUTO_UPDATE } from "@liveagent/ui/lib/custom/lszCustomization";
 import {
   CATALOG_LIVE_DEFAULT_URL,
   configureCatalogLiveSources,
@@ -56,6 +57,10 @@ import { ReleaseAnnouncementDialog } from "./components/ReleaseAnnouncementDialo
 import { WindowsSettingsHeader } from "./components/WindowsSettingsHeader";
 import { WindowsTitleBar } from "./components/WindowsTitleBar";
 import { useAppUpdateController } from "./lib/appUpdates";
+import {
+  recordLszModelSelectionChange,
+  useLszPeriodicModelSync,
+} from "./lib/custom/lszProviderSync";
 import { isKBrainBrowserHost } from "./lib/host";
 import { restartKBrainBackend } from "./lib/kbrain/bootstrap";
 import { HistoryMigrationNoticeBanner } from "./lib/kbrain/HistoryMigrationNoticeBanner";
@@ -671,6 +676,7 @@ export default function App() {
         normalizeSettings(updated),
         defaultWorkdirRef.current,
       );
+      recordLszModelSelectionChange(prev.selectedModel, next.selectedModel);
       settingsRef.current = next;
       setSettingsState(next);
       queueSettingsSave(
@@ -823,6 +829,7 @@ export default function App() {
           break;
         }
         case "check-updates": {
+          if (LSZ_DISABLE_AUTO_UPDATE) break;
           openSettingsRef.current("about");
           runUpdateCheckRef.current();
           break;
@@ -899,14 +906,20 @@ export default function App() {
     runningConversationCountRef.current = count;
   }, []);
 
-  const appUpdate = useAppUpdateController({
+  useLszPeriodicModelSync({
     enabled: settingsReady,
+    settingsRef,
+    setSettings,
+  });
+
+  const appUpdate = useAppUpdateController({
+    enabled: !LSZ_DISABLE_AUTO_UPDATE && settingsReady,
     includePrereleases: settings.updates.includePrereleases,
     messages: appUpdateMessages,
     beforeRestart: beforeAppRestart,
   });
   const releaseAnnouncement = useReleaseAnnouncementController({
-    enabled: settingsReady,
+    enabled: !LSZ_DISABLE_AUTO_UPDATE && settingsReady,
     currentVersion: __LIVEAGENT_APP_VERSION__,
   });
   // 托盘「检查更新」动作：controller 在监听 effect 之后创建，经 ref 回填。

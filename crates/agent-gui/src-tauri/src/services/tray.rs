@@ -210,30 +210,32 @@ pub fn build_tray_menu_skeleton(
     )?;
     let quit = MenuItem::with_id(app, TRAY_QUIT_ID, "退出", true, None::<&str>)?;
 
-    let menu = Menu::with_items(
-        app,
-        &[
-            &status,
-            &PredefinedMenuItem::separator(app)?,
-            &show,
-            &new_chat,
-            &pin,
-            &PredefinedMenuItem::separator(app)?,
-            &recent,
-            &workspaces,
-            &PredefinedMenuItem::separator(app)?,
-            &runs,
-            &cron,
-            &gateway,
-            &PredefinedMenuItem::separator(app)?,
-            &appearance,
-            &settings,
-            &check_updates,
-            &open_data_dir,
-            &PredefinedMenuItem::separator(app)?,
-            &quit,
-        ],
-    )?;
+    let mut menu_items: Vec<&dyn tauri::menu::IsMenuItem<tauri::Wry>> = vec![
+        &status,
+        &PredefinedMenuItem::separator(app)?,
+        &show,
+        &new_chat,
+        &pin,
+        &PredefinedMenuItem::separator(app)?,
+        &recent,
+        &workspaces,
+        &PredefinedMenuItem::separator(app)?,
+        &runs,
+        &cron,
+        &gateway,
+        &PredefinedMenuItem::separator(app)?,
+        &appearance,
+        &settings,
+    ];
+    if !crate::custom::DISABLE_AUTO_UPDATE {
+        menu_items.push(&check_updates);
+    }
+    menu_items.extend([
+        &open_data_dir as &dyn tauri::menu::IsMenuItem<tauri::Wry>,
+        &PredefinedMenuItem::separator(app)?,
+        &quit,
+    ]);
+    let menu = Menu::with_items(app, &menu_items)?;
 
     Ok(TrayMenuSkeleton {
         menu,
@@ -443,7 +445,7 @@ pub fn apply_tray_menu(
         .map_err(err)?;
 
     // 托盘图标附属状态。
-    let tooltip = model.tooltip.as_deref().unwrap_or("LiveAgent");
+    let tooltip = model.tooltip.as_deref().unwrap_or(crate::custom::APP_NAME);
     if let Err(error) = handles.tray_icon.set_tooltip(Some(tooltip)) {
         // Linux 不支持 tooltip；仅记录不失败。
         eprintln!("failed to set tray tooltip: {error}");
@@ -459,7 +461,7 @@ pub fn apply_tray_menu(
 }
 
 fn compose_status_line(app_version: &str, status_suffix: Option<&str>) -> String {
-    let base = format!("LiveAgent {app_version}");
+    let base = format!("{} {app_version}", crate::custom::APP_NAME);
     match status_suffix {
         Some(suffix) if !suffix.trim().is_empty() => format!("{base} · {}", suffix.trim()),
         _ => base,

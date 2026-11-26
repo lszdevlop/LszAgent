@@ -1,4 +1,5 @@
 import { createHostTranslations, type Locale } from "@liveagent/ui/i18n/hostTranslations";
+import { LSZ_APP_NAME } from "@liveagent/ui/lib/custom/lszCustomization";
 import { CHAT_PAGE_TRANSLATIONS } from "./chatPageTranslations";
 import { PROVIDER_IMPORT_TRANSLATIONS } from "./providerImportTranslations";
 
@@ -94,7 +95,7 @@ export const GUI_TRANSLATION_OVERRIDES: Record<Locale, Record<string, string>> =
     "chat.workspaceShowAll": "显示全部（{count}）",
     "chat.workspaceShowLess": "收起",
     "chat.workspaceOpenSystemFileManagerFailed": "打开资源管理器失败",
-    "chat.exitConfirmTitle": "退出 LiveAgent？",
+    "chat.exitConfirmTitle": `退出 ${LSZ_APP_NAME}？`,
     "chat.exitConfirmSubtitle": "当前仍有终端任务在运行。",
     "chat.exitConfirmDescription": "继续退出会关闭这些终端进程。取消后可返回项目工具栏处理。",
     "chat.exitConfirmNote": "不会删除项目或会话历史，但正在运行的命令会被终止。",
@@ -106,7 +107,7 @@ export const GUI_TRANSLATION_OVERRIDES: Record<Locale, Record<string, string>> =
     "projectTools.sshLocalForwardListening": "正在监听（仅本机）",
     "settings.navAbout": "关于",
     "settings.groupOther": "其他",
-    "settings.aboutTitle": "关于 LiveAgent",
+    "settings.aboutTitle": `关于 ${LSZ_APP_NAME}`,
     "settings.aboutDescription": "查看当前版本、发布说明和桌面端更新状态。",
     "settings.aboutApplication": "应用",
     "settings.aboutApplicationDesc": "名称、版本与当前更新通道。",
@@ -373,7 +374,7 @@ export const GUI_TRANSLATION_OVERRIDES: Record<Locale, Record<string, string>> =
     "tray.settings": "设置…",
     "tray.checkUpdates": "检查更新…",
     "tray.openDataDir": "打开数据目录",
-    "tray.quit": "退出 LiveAgent",
+    "tray.quit": `退出 ${LSZ_APP_NAME}`,
     "tray.untitledConversation": "未命名对话",
     "tray.untitledCronTask": "未命名任务",
     "tray.cronEnabled": "已启用定时任务「{name}」",
@@ -489,7 +490,7 @@ export const GUI_TRANSLATION_OVERRIDES: Record<Locale, Record<string, string>> =
     "chat.workspaceShowAll": "Show all ({count})",
     "chat.workspaceShowLess": "Show less",
     "chat.workspaceOpenSystemFileManagerFailed": "Failed to open the file manager",
-    "chat.exitConfirmTitle": "Exit LiveAgent?",
+    "chat.exitConfirmTitle": `Exit ${LSZ_APP_NAME}?`,
     "chat.exitConfirmSubtitle": "Terminal tasks are still running.",
     "chat.exitConfirmDescription":
       "Exiting will close these terminal processes. Cancel to return to the project tools and handle them manually.",
@@ -503,7 +504,7 @@ export const GUI_TRANSLATION_OVERRIDES: Record<Locale, Record<string, string>> =
     "projectTools.sshLocalForwardListening": "Listening on this computer only",
     "settings.navAbout": "About",
     "settings.groupOther": "Other",
-    "settings.aboutTitle": "About LiveAgent",
+    "settings.aboutTitle": `About ${LSZ_APP_NAME}`,
     "settings.aboutDescription":
       "View the current version, release notes, and desktop update status.",
     "settings.aboutApplication": "Application",
@@ -795,7 +796,7 @@ export const GUI_TRANSLATION_OVERRIDES: Record<Locale, Record<string, string>> =
     "tray.settings": "Settings…",
     "tray.checkUpdates": "Check for Updates…",
     "tray.openDataDir": "Open Data Folder",
-    "tray.quit": "Quit LiveAgent",
+    "tray.quit": `Quit ${LSZ_APP_NAME}`,
     "tray.untitledConversation": "Untitled chat",
     "tray.untitledCronTask": "Untitled task",
     "tray.cronEnabled": "Enabled cron task {name}",

@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from "@liveagent/ui/components/ui/dialog";
 import { useLocale } from "@liveagent/ui/i18n/index";
+import { LSZ_APP_NAME } from "@liveagent/ui/lib/custom/lszCustomization";
 import type { ReleaseAnnouncementController } from "../lib/releaseAnnouncement";
 import { releaseNotesBody, releaseTitle } from "../lib/releaseNotes";
 import { formatReleaseDate } from "../pages/settings/aboutDate";
@@ -26,7 +27,7 @@ export function ReleaseAnnouncementDialog({
   const announcement = controller.announcement;
   if (!announcement) return null;
 
-  const title = releaseTitle(announcement) || `LiveAgent v${announcement.currentVersion}`;
+  const title = releaseTitle(announcement) || `${LSZ_APP_NAME} v${announcement.currentVersion}`;
   const releaseDate = formatReleaseDate(announcement.date);
   return (
     <Dialog

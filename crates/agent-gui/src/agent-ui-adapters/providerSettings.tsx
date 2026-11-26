@@ -14,6 +14,7 @@ import {
   DialogTitle,
 } from "@liveagent/ui/components/ui/dialog";
 import { useLocale } from "@liveagent/ui/i18n/index";
+import { LSZ_DISABLE_API_KEY_REVEAL } from "@liveagent/ui/lib/custom/lszCustomization";
 import type { CustomHeader } from "@liveagent/ui/lib/providers/customHeaders";
 import { cn } from "@liveagent/ui/lib/shared/utils";
 import type { ProviderModelDiscoveryInput } from "@liveagent/ui/pages/settings/providerSettingsAdapter";
@@ -62,6 +63,7 @@ export const providerCredentialsRedacted = true;
  * explicit user action (the eye button); returns null when nothing is stored.
  */
 export async function revealStoredProviderApiKey(providerId: string): Promise<string | null> {
+  if (LSZ_DISABLE_API_KEY_REVEAL) return null;
   const secrets = await createKBrainClient().revealProviderSecrets(providerId);
   return secrets.apiKey?.trim() ? secrets.apiKey : null;
 }
@@ -384,6 +386,7 @@ function CcsImportModal(props: {
 
 /** 桌面端复制内容：Base URL 与 API Key 各占一行，空值省略。 */
 export function formatProviderCopyConfig(provider: Pick<CustomProvider, "baseUrl" | "apiKey">) {
+  if (LSZ_DISABLE_API_KEY_REVEAL) return provider.baseUrl.trim();
   return [provider.baseUrl.trim(), provider.apiKey.trim()].filter(Boolean).join("\n");
 }
 

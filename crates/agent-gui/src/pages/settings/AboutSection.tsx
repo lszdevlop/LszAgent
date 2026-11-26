@@ -19,6 +19,7 @@ import {
 } from "@liveagent/ui/components/ui/dialog";
 import { toast } from "@liveagent/ui/components/ui/toast-manager";
 import { useLocale } from "@liveagent/ui/i18n/index";
+import { LSZ_APP_NAME, LSZ_DISABLE_AUTO_UPDATE } from "@liveagent/ui/lib/custom/lszCustomization";
 import { hostAwareErrorMessage } from "@liveagent/ui/lib/shared/hostErrors";
 import {
   DiagnosticsExportRow,
@@ -218,7 +219,7 @@ export function AboutSection(props: AboutSectionProps) {
             control={
               <div className="text-right">
                 <div className="text-sm font-medium text-foreground">
-                  LiveAgent v{currentVersion}
+                  {LSZ_APP_NAME} v{currentVersion}
                 </div>
                 <div className="mt-0.5 text-xs text-muted-foreground">{channelLabel}</div>
               </div>
@@ -227,162 +228,168 @@ export function AboutSection(props: AboutSectionProps) {
 
           <KBrainBackendRow loadHealth={getKBrainHealth} />
 
-          <SettingsRow
-            data-settings-anchor="about-update"
-            title={t("settings.aboutSoftwareUpdate")}
-            description={t("settings.aboutSoftwareUpdateDesc")}
-            control={
-              <div className="grid min-w-64 grid-cols-2 gap-2">
-                {latestReleaseNotes ? (
-                  <Dialog>
-                    <DialogTrigger
-                      render={<Button className="w-full" variant="outline" size="sm" />}
-                    >
-                      {t("settings.aboutReleaseNotes")}
-                    </DialogTrigger>
-                    <DialogContent
-                      className="max-w-2xl"
-                      showCloseButton
-                      closeLabel={t("settings.cancel")}
-                    >
-                      <DialogHeader>
-                        <DialogTitle>{releaseTitle(latestResult)}</DialogTitle>
-                        {releaseMeta ? <DialogDescription>{releaseMeta}</DialogDescription> : null}
-                      </DialogHeader>
-                      <DialogBody className="max-h-[70vh]">
-                        <Markdown
-                          content={latestReleaseNotes}
-                          className="release-notes-markdown text-sm leading-relaxed text-muted-foreground"
-                        />
-                      </DialogBody>
-                      {latestResult?.releaseUrl ? (
-                        <DialogFooter>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => void openUrl(latestResult.releaseUrl || "")}
-                          >
-                            <ExternalLink className="size-3.5" />
-                            {t("settings.aboutOpenRelease")}
-                          </Button>
-                        </DialogFooter>
-                      ) : null}
-                    </DialogContent>
-                  </Dialog>
-                ) : (
-                  <Button
-                    type="button"
-                    className="w-full"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => void openUrl(latestResult?.releaseUrl || "")}
-                    disabled={!latestResult?.releaseUrl}
-                  >
-                    <ExternalLink className="size-3.5" />
-                    {t("settings.aboutReleaseNotes")}
-                  </Button>
-                )}
-                {!showInstallAction ? (
-                  <RefreshButton
-                    aria-busy={checking}
-                    type="button"
-                    className="w-full"
-                    size="sm"
-                    onClick={() => void handleCheckUpdate()}
-                    disabled={updateBusy}
-                  >
-                    {checking ? (
-                      <Loader2 className="size-3.5 animate-spin" />
+          {!LSZ_DISABLE_AUTO_UPDATE ? (
+            <>
+              <SettingsRow
+                data-settings-anchor="about-update"
+                title={t("settings.aboutSoftwareUpdate")}
+                description={t("settings.aboutSoftwareUpdateDesc")}
+                control={
+                  <div className="grid min-w-64 grid-cols-2 gap-2">
+                    {latestReleaseNotes ? (
+                      <Dialog>
+                        <DialogTrigger
+                          render={<Button className="w-full" variant="outline" size="sm" />}
+                        >
+                          {t("settings.aboutReleaseNotes")}
+                        </DialogTrigger>
+                        <DialogContent
+                          className="max-w-2xl"
+                          showCloseButton
+                          closeLabel={t("settings.cancel")}
+                        >
+                          <DialogHeader>
+                            <DialogTitle>{releaseTitle(latestResult)}</DialogTitle>
+                            {releaseMeta ? (
+                              <DialogDescription>{releaseMeta}</DialogDescription>
+                            ) : null}
+                          </DialogHeader>
+                          <DialogBody className="max-h-[70vh]">
+                            <Markdown
+                              content={latestReleaseNotes}
+                              className="release-notes-markdown text-sm leading-relaxed text-muted-foreground"
+                            />
+                          </DialogBody>
+                          {latestResult?.releaseUrl ? (
+                            <DialogFooter>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => void openUrl(latestResult.releaseUrl || "")}
+                              >
+                                <ExternalLink className="size-3.5" />
+                                {t("settings.aboutOpenRelease")}
+                              </Button>
+                            </DialogFooter>
+                          ) : null}
+                        </DialogContent>
+                      </Dialog>
                     ) : (
-                      <RefreshCw data-refresh-icon className="size-3.5" />
+                      <Button
+                        type="button"
+                        className="w-full"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => void openUrl(latestResult?.releaseUrl || "")}
+                        disabled={!latestResult?.releaseUrl}
+                      >
+                        <ExternalLink className="size-3.5" />
+                        {t("settings.aboutReleaseNotes")}
+                      </Button>
                     )}
-                    {t("settings.aboutCheckUpdate")}
-                  </RefreshButton>
-                ) : null}
-                {showInstallAction ? (
-                  <Button
-                    type="button"
-                    className="w-full"
-                    size="sm"
-                    onClick={installed ? handleRestartApp : handleInstallUpdate}
-                    disabled={updateBusy}
-                  >
-                    {updateBusy ? (
-                      <Loader2 className="size-3.5 animate-spin" />
-                    ) : installed ? (
-                      <RefreshCw className="size-3.5" />
-                    ) : (
-                      <Download className="size-3.5" />
-                    )}
-                    {updateActionLabel}
-                  </Button>
-                ) : null}
-              </div>
-            }
-          />
-
-          <SettingsRow
-            title={t("settings.aboutUpdateAnnouncement")}
-            description={t("settings.aboutUpdateAnnouncementDesc")}
-            control={
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => void handleOpenAnnouncement()}
-                disabled={releaseAnnouncement.loading}
-                aria-busy={releaseAnnouncement.loadingAction === "announcement"}
-              >
-                {releaseAnnouncement.loadingAction === "announcement" ? (
-                  <Loader2 className="size-3.5 animate-spin" />
-                ) : null}
-                {t("settings.aboutOpenAnnouncement")}
-              </Button>
-            }
-          />
-
-          {import.meta.env.DEV ? (
-            <SettingsRow
-              data-settings-anchor="about-debug"
-              title={t("settings.aboutDebugMode")}
-              description={t("settings.aboutDebugModeDesc")}
-              control={
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => void handlePreviewAnnouncement()}
-                  disabled={releaseAnnouncement.loading}
-                  aria-busy={releaseAnnouncement.loadingAction === "preview"}
-                >
-                  {releaseAnnouncement.loadingAction === "preview" ? (
-                    <Loader2 className="size-3.5 animate-spin" />
-                  ) : null}
-                  {t("settings.aboutPreviewAnnouncement")}
-                </Button>
-              }
-            />
-          ) : null}
-
-          <SettingsRow
-            data-settings-anchor="about-prerelease"
-            title={t("settings.aboutPrereleaseTitle")}
-            description={t("settings.aboutPrereleaseDesc")}
-            control={
-              <AgentActivationSwitch
-                checked={includePrereleases}
-                title={t("settings.aboutPrereleaseToggle")}
-                onToggle={() =>
-                  setSettings((prev) =>
-                    updateUpdateSettings(prev, {
-                      includePrereleases: !prev.updates.includePrereleases,
-                    }),
-                  )
+                    {!showInstallAction ? (
+                      <RefreshButton
+                        aria-busy={checking}
+                        type="button"
+                        className="w-full"
+                        size="sm"
+                        onClick={() => void handleCheckUpdate()}
+                        disabled={updateBusy}
+                      >
+                        {checking ? (
+                          <Loader2 className="size-3.5 animate-spin" />
+                        ) : (
+                          <RefreshCw data-refresh-icon className="size-3.5" />
+                        )}
+                        {t("settings.aboutCheckUpdate")}
+                      </RefreshButton>
+                    ) : null}
+                    {showInstallAction ? (
+                      <Button
+                        type="button"
+                        className="w-full"
+                        size="sm"
+                        onClick={installed ? handleRestartApp : handleInstallUpdate}
+                        disabled={updateBusy}
+                      >
+                        {updateBusy ? (
+                          <Loader2 className="size-3.5 animate-spin" />
+                        ) : installed ? (
+                          <RefreshCw className="size-3.5" />
+                        ) : (
+                          <Download className="size-3.5" />
+                        )}
+                        {updateActionLabel}
+                      </Button>
+                    ) : null}
+                  </div>
                 }
               />
-            }
-          />
+
+              <SettingsRow
+                title={t("settings.aboutUpdateAnnouncement")}
+                description={t("settings.aboutUpdateAnnouncementDesc")}
+                control={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => void handleOpenAnnouncement()}
+                    disabled={releaseAnnouncement.loading}
+                    aria-busy={releaseAnnouncement.loadingAction === "announcement"}
+                  >
+                    {releaseAnnouncement.loadingAction === "announcement" ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : null}
+                    {t("settings.aboutOpenAnnouncement")}
+                  </Button>
+                }
+              />
+
+              {import.meta.env.DEV ? (
+                <SettingsRow
+                  data-settings-anchor="about-debug"
+                  title={t("settings.aboutDebugMode")}
+                  description={t("settings.aboutDebugModeDesc")}
+                  control={
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => void handlePreviewAnnouncement()}
+                      disabled={releaseAnnouncement.loading}
+                      aria-busy={releaseAnnouncement.loadingAction === "preview"}
+                    >
+                      {releaseAnnouncement.loadingAction === "preview" ? (
+                        <Loader2 className="size-3.5 animate-spin" />
+                      ) : null}
+                      {t("settings.aboutPreviewAnnouncement")}
+                    </Button>
+                  }
+                />
+              ) : null}
+
+              <SettingsRow
+                data-settings-anchor="about-prerelease"
+                title={t("settings.aboutPrereleaseTitle")}
+                description={t("settings.aboutPrereleaseDesc")}
+                control={
+                  <AgentActivationSwitch
+                    checked={includePrereleases}
+                    title={t("settings.aboutPrereleaseToggle")}
+                    onToggle={() =>
+                      setSettings((prev) =>
+                        updateUpdateSettings(prev, {
+                          includePrereleases: !prev.updates.includePrereleases,
+                        }),
+                      )
+                    }
+                  />
+                }
+              />
+            </>
+          ) : null}
         </SettingsCard>
       </SettingsSection>
       <SettingsSection title={t("settings.aboutHelp")}>
